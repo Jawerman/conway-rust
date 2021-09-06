@@ -29,9 +29,6 @@ where
     T: World + Clone + ConstructableWorld + Send + Sync + 'static,
 {
     pub fn new(world: T, fps: i64, num_threads: usize) -> Game<T> {
-        let num_threads_sqrt = (num_threads as f64).sqrt().floor() as usize;
-        let num_threads = num_threads_sqrt *  num_threads_sqrt;
-
         Game {
             num_threads,
             generation: 0,
@@ -42,7 +39,7 @@ where
         }
     }
 
-    pub fn draw(&self, live_color: [u8; 4], dead_color: [u8; 4], screen: &mut [u8])  {
+    pub fn draw(&self, live_color: [u8; 4], dead_color: [u8; 4], screen: &mut [u8]) {
         for ((_, _, cell), pix) in self.world.into_iterator().zip(screen.chunks_exact_mut(4)) {
             if let CellState::Alive = cell {
                 pix.copy_from_slice(&live_color);
@@ -93,13 +90,10 @@ where
     pub fn update(&mut self, dt: f64) {
         self.waiting += dt * 1000.0;
 
-        // @TODO Calcular en el constructor para no repetir el cálculo
-        let split_grid_side_count = (self.num_threads as f64).sqrt().ceil() as u32;
+        let split_grid_side_count = self.num_threads as u32;
 
         // println!("Waiting {}, frame_time: {}", self.waiting, self.frame_time);
         while self.waiting >= self.frame_time {
-
-            // println!("Generation {}", self.generation);
             let (sender, receiver) = mpsc::channel();
             let (width, height) = self.world.get_size();
 
@@ -108,13 +102,8 @@ where
                 let source_world = self.world.clone();
                 let sender = sender.clone();
                 self.thread_pool.execute(move || {
-                    let (x, y, width, height) = Self::get_chunk_limits(
-                        width,
-                        height,
-                        index,
-                        split_grid_side_count,
-                        split_grid_side_count,
-                    );
+                    let (x, y, width, height) =
+                        Self::get_chunk_limits(width, height, index, split_grid_side_count);
                     let source_world = source_world.deref();
                     let result = Self::get_chunk_next_state(source_world, x, y, width, height);
 
@@ -139,7 +128,7 @@ where
             let mut new_world = Box::new(T::new(width, height));
             for WorldChunk { index, world } in results.iter() {
                 let (x, y, _, _) =
-                    Self::get_chunk_limits(width, height, *index, split_grid_side_count, split_grid_side_count);
+                    Self::get_chunk_limits(width, height, *index, split_grid_side_count);
                 Self::apply_chunk(&mut new_world, world, x, y);
             }
 
@@ -154,14 +143,11 @@ where
         height: u32,
         index: u32,
         num_rows: u32,
-        num_cols: u32,
     ) -> (u32, u32, u32, u32) {
-        let chunk_width = (width as f64 / num_cols as f64).ceil() as u32;
         let chunk_height = (height as f64 / num_rows as f64).ceil() as u32;
-        let x = (index % num_cols) * chunk_width;
-        let y = (index / num_rows) * chunk_height;
+        let y = index * chunk_height;
 
-        (x, y, chunk_width, chunk_height)
+        (0, y, width, chunk_height)
     }
 
     fn get_chunk_next_state(source: &T, x: u32, y: u32, grid_width: u32, grid_height: u32) -> T {

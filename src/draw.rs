@@ -1,7 +1,5 @@
 use winit::dpi::{LogicalPosition, LogicalSize, PhysicalSize};
-use winit::event_loop::{EventLoop};
-
-
+use winit::event_loop::EventLoop;
 
 pub fn create_window(
     width: u32,
@@ -23,7 +21,10 @@ pub fn create_window(
     // Get dimensions
     let (monitor_width, monitor_height) = {
         let size = window.current_monitor().unwrap().size();
-        (size.width as f64 / scale_factor, size.height as f64 / scale_factor)
+        (
+            size.width as f64 / scale_factor,
+            size.height as f64 / scale_factor,
+        )
     };
     let scale = (monitor_height / height * 2.0 / 3.0).round();
 
@@ -38,7 +39,6 @@ pub fn create_window(
     window.set_min_inner_size(Some(min_size));
     window.set_outer_position(center);
     window.set_visible(true);
-
 
     // let surface = pixels::wgpu::Surface::create(&window);
     let size = default_size.to_physical::<f64>(scale_factor);
