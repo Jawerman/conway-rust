@@ -39,10 +39,10 @@ fn main() {
 
     let event_loop = EventLoop::new();
 
-    let (window, surface,  p_width,  p_height, mut hidpi_factor) =
+    let (window, p_width,  p_height, mut hidpi_factor) =
         draw::create_window(width, height, "Conway's Game of Life", &event_loop);
 
-    let surface_texture = SurfaceTexture::new(p_width, p_height, surface);
+    let surface_texture = SurfaceTexture::new(p_width, p_height, &window);
     let mut pixels = Pixels::new(width, height, surface_texture).expect("Error creating pixels buffer");
 
 
@@ -57,7 +57,7 @@ fn main() {
         match event {
             Event::RedrawRequested(window_id) if window_id == window.id() => {
                 game.draw(LIVE_COLOR, BLACK_COLOR, pixels.get_frame());
-                pixels.render();
+                pixels.render().expect("Rendering error");
             },
             Event::WindowEvent {
                 event: WindowEvent::CloseRequested,
@@ -68,7 +68,7 @@ fn main() {
                 window_id,
             } if window_id == window.id() => {
                 let size = size.to_logical::<f64>(hidpi_factor);
-                pixels.resize(size.width.round() as u32, size.height.round() as u32);
+                pixels.resize_surface(size.width.round() as u32, size.height.round() as u32);
             },
             Event::WindowEvent {
                 event: WindowEvent::ScaleFactorChanged {scale_factor, new_inner_size: _},

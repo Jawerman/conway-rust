@@ -8,7 +8,7 @@ pub fn create_window(
     height: u32,
     title: &str,
     event_loop: &EventLoop<()>,
-) -> (winit::window::Window, pixels::wgpu::Surface, u32, u32, f64) {
+) -> (winit::window::Window, u32, u32, f64) {
     // Create a hidden window so we can estimate a good default window size
     let window = winit::window::WindowBuilder::new()
         .with_visible(false)
@@ -22,7 +22,7 @@ pub fn create_window(
 
     // Get dimensions
     let (monitor_width, monitor_height) = {
-        let size = window.current_monitor().size();
+        let size = window.current_monitor().unwrap().size();
         (size.width as f64 / scale_factor, size.height as f64 / scale_factor)
     };
     let scale = (monitor_height / height * 2.0 / 3.0).round();
@@ -39,12 +39,13 @@ pub fn create_window(
     window.set_outer_position(center);
     window.set_visible(true);
 
-    let surface = pixels::wgpu::Surface::create(&window);
+
+    // let surface = pixels::wgpu::Surface::create(&window);
     let size = default_size.to_physical::<f64>(scale_factor);
 
     (
         window,
-        surface,
+        // surface,
         size.width.round() as u32,
         size.height.round() as u32,
         scale_factor,

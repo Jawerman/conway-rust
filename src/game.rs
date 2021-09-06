@@ -191,8 +191,8 @@ where
         let (width, height) = self.world.get_size();
 
         for _ in 0..num_cells {
-            let x = rng.gen_range(0, width);
-            let y = rng.gen_range(0, height);
+            let x = rng.gen_range(0..width);
+            let y = rng.gen_range(0..height);
 
             if let Some(w) = Arc::get_mut(&mut self.world) {
                 w.set_cell_state(x, y, CellState::Alive);
