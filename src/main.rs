@@ -27,28 +27,25 @@ fn get_args() -> Result<(u32, u32, u32, u32), &'static str> {
     }
 
     let width = args
-        .get(0)
-        .map(|x| x.parse::<u32>().ok())
-        .flatten()
+        .first()
+        .and_then(|x| x.parse::<u32>().ok())
         .unwrap_or(128);
+
     let height = args
         .get(1)
-        .map(|x| x.parse::<u32>().ok())
-        .flatten()
+        .and_then(|x| x.parse::<u32>().ok())
         .unwrap_or(64);
-    let num_threads = args
-        .get(2)
-        .map(|x| x.parse::<u32>().ok())
-        .flatten()
-        .unwrap_or(4);
+
+    let num_threads = args.get(2).and_then(|x| x.parse::<u32>().ok()).unwrap_or(4);
+
     let ups = args
         .get(3)
-        .map(|x| x.parse::<u32>().ok())
-        .flatten()
+        .and_then(|x| x.parse::<u32>().ok())
         .unwrap_or(15);
 
     Ok((width, height, num_threads, ups))
 }
+
 fn main() {
     let (width, height, num_threads, ups) = get_args().unwrap();
     let initial_population = (width * height) / 2;

@@ -17,7 +17,7 @@ where
     T: World + Clone + ConstructableWorld + 'static,
 {
     generation: u32,
-    world: Arc<Box<T>>,
+    world: Arc<T>,
     thread_pool: ThreadPool,
     frame_time: f64,
     waiting: f64,
@@ -35,7 +35,7 @@ where
             waiting: 0.0,
             frame_time: 1000.0 / fps as f64,
             thread_pool: ThreadPool::new(num_threads),
-            world: Arc::new(Box::new(world.clone())),
+            world: Arc::new(world.clone()),
         }
     }
 
@@ -132,7 +132,7 @@ where
                 Self::apply_chunk(&mut new_world, world, x, y);
             }
 
-            self.world = Arc::new(new_world);
+            self.world = Arc::new(*new_world);
             self.generation += 1;
             self.waiting -= self.frame_time;
         }
