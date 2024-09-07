@@ -11,7 +11,7 @@ pub fn create_window(
     let window = winit::window::WindowBuilder::new()
         .with_visible(false)
         .with_title(title)
-        .build(&event_loop)
+        .build(event_loop)
         .unwrap();
 
     let scale_factor = window.scale_factor();
